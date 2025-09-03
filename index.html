@@ -1,16 +1,17 @@
-<div style="width:100%; max-width:450px; margin:auto; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+<div style="width:100%; height:100vh; margin:0; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
   <style>
-    /* Same CSS as before (copy paste from previous code) */
     .chat-wrapper * { box-sizing: border-box; }
     .chat-wrapper {
       background: rgba(22, 22, 22, 0.9);
       border: 1px solid #333;
-      border-radius: 16px;
+      border-radius: 0; /* full screen ke liye radius hata diya */
       overflow: hidden;
       box-shadow: 0 0 25px rgba(0, 0, 0, 0.8);
       display: flex;
       flex-direction: column;
-      height: 700px;
+      height: 100vh;   /* 🔥 ab pura screen cover karega */
+      width: 100%;
+      max-width: 100%; /* koi fix width nahi */
     }
 
     .chat-header {
@@ -149,40 +150,28 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
   <script>
     let selectedFile = null;
-
     const BACKEND_URL = "https://aj-backend-79nl.onrender.com/chat";
 
     async function sendMessage() {
       const input = document.getElementById("userInput");
       const msg = input.value.trim();
-
-      // If no message and no file, do nothing
       if (!msg && !selectedFile) return;
 
-      // Show user message + file preview in chat
       if (selectedFile) {
         if (selectedFile.type.startsWith("image/")) {
-          // Image preview message
           const reader = new FileReader();
-          reader.onload = (e) => {
-            addImageMessage(e.target.result, "user");
-          };
+          reader.onload = (e) => { addImageMessage(e.target.result, "user"); };
           reader.readAsDataURL(selectedFile);
         } else {
-          // Document message with file name
           addMessage(`Document uploaded: ${selectedFile.name}`, "user");
         }
-        selectedFile = null;  // clear after send
+        selectedFile = null;
         document.getElementById("filePreview").innerHTML = "";
       }
 
-      if (msg) {
-        addMessage(msg, "user");
-      }
-
+      if (msg) addMessage(msg, "user");
       input.value = "";
 
-      // AJ is thinking message
       const botMsg = addMessage("⏳ AJ सोच रहा है...", "bot");
 
       try {
@@ -192,17 +181,13 @@
           body: JSON.stringify({
             model: "deepseek/deepseek-chat-v3.1:free",
             messages: [
-              {
-                role: "system",
-                content: "You are AJ, created by Ayush. ✅ हमेशा अगर कोई creator पूछे तो बताओ कि तुम्हारा creator Ayush है। ✅ Reply Hinglish में दो। ✅ Step-by-step explain karo, bullets use karo, aur tone friendly + professional rakho."
-              },
+              { role: "system", content: "You are AJ, created by Ayush. ✅ हमेशा अगर कोई creator पूछे तो बताओ कि तुम्हारा creator Ayush है। ✅ Reply Hinglish में दो। ✅ Step-by-step explain karo, bullets use karo, aur tone friendly + professional rakho." },
               { role: "user", content: msg }
             ],
             temperature: 0.7,
             max_tokens: 800
           })
         });
-
         const data = await response.json();
         const reply = data.choices?.[0]?.message?.content?.trim() || "❌ Error in response";
         botMsg.innerHTML = reply.replace(/\n/g, "<br>");
@@ -224,11 +209,9 @@
       const img = document.createElement("img");
       img.src = src;
       img.className = "chat-image-preview";
-
       const wrapper = document.createElement("div");
       wrapper.className = `chat-message ${sender}`;
       wrapper.appendChild(img);
-
       document.getElementById("chatMessages").appendChild(wrapper);
       document.getElementById("chatMessages").scrollTop = document.getElementById("chatMessages").scrollHeight;
       return wrapper;
@@ -237,20 +220,15 @@
     function handleFileSelect(event) {
       const file = event.target.files[0];
       if (!file) return;
-
       selectedFile = file;
-
-      // Show preview in input area next to buttons
       const preview = document.getElementById("filePreview");
-      preview.innerHTML = ""; // clear old preview
-
+      preview.innerHTML = "";
       if (file.type.startsWith("image/")) {
         const img = document.createElement("img");
         img.src = URL.createObjectURL(file);
         img.className = "chat-image-preview";
         preview.appendChild(img);
       } else {
-        // Show file name for document
         const div = document.createElement("div");
         div.className = "chat-file-preview";
         div.textContent = file.name;
