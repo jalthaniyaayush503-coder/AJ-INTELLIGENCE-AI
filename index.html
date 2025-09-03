@@ -1,44 +1,56 @@
-<div style="width:100%; height:100vh; margin:0; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+<div style="margin:0; padding:0; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
   <style>
     .chat-wrapper * { box-sizing: border-box; }
+
     .chat-wrapper {
-      background: rgba(22, 22, 22, 0.9);
+      background: rgba(22, 22, 22, 0.95);
       border: 1px solid #333;
-      border-radius: 0; /* full screen ke liye radius hata diya */
+      border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 0 25px rgba(0, 0, 0, 0.8);
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.8);
       display: flex;
       flex-direction: column;
-      height: 100vh;   /* 🔥 ab pura screen cover karega */
+      height: 90vh;
       width: 100%;
-      max-width: 100%; /* koi fix width nahi */
+      max-width: 450px;
+      margin: auto;   /* desktop pe center */
+    }
+
+    /* Mobile full width */
+    @media (max-width: 600px) {
+      .chat-wrapper {
+        max-width: 100%;
+        height: 100vh;
+        border-radius: 0;
+      }
     }
 
     .chat-header {
       background: rgba(0, 0, 0, 0.7);
       color: #ff69b4;
       text-align: center;
-      padding: 15px;
+      padding: 14px;
       font-weight: bold;
-      font-size: 18px;
+      font-size: 20px;
     }
 
     .chat-messages {
       flex: 1;
-      padding: 15px;
+      padding: 12px;
       overflow-y: auto;
       background: rgba(0, 0, 0, 0.4);
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
+      font-size: 15px;
     }
 
     .chat-message {
-      padding: 12px 16px;
-      border-radius: 12px;
-      font-size: 14px;
+      padding: 10px 14px;
+      border-radius: 10px;
       line-height: 1.5;
       max-width: 85%;
+      word-wrap: break-word;
     }
 
     .chat-message.user {
@@ -69,11 +81,10 @@
 
     .chat-input-area {
       display: flex;
-      gap: 8px;
-      background: rgba(0, 0, 0, 0.6);
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.7);
       border-top: 1px solid #444;
-      padding: 10px;
-      flex-wrap: wrap;
+      padding: 8px;
       align-items: center;
     }
 
@@ -85,15 +96,17 @@
       background: #333;
       color: #fff;
       outline: none;
+      font-size: 15px;
     }
 
     .chat-input-area button {
       background-color: #ff69b4;
       border: none;
       border-radius: 8px;
-      padding: 10px 14px;
+      padding: 10px 12px;
       color: #fff;
       cursor: pointer;
+      font-size: 16px;
     }
 
     .chat-input-area button:hover {
@@ -101,18 +114,18 @@
     }
 
     .chat-image-preview {
-      max-width: 100px;
-      border-radius: 8px;
-      margin-left: 8px;
+      max-width: 80px;
+      border-radius: 6px;
+      margin-left: 6px;
     }
 
     .chat-file-preview {
-      max-width: 150px;
+      max-width: 120px;
       background: #444;
       color: #fff;
-      padding: 5px 10px;
-      border-radius: 8px;
-      margin-left: 8px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      margin-left: 6px;
       font-size: 12px;
       overflow-wrap: break-word;
     }
@@ -121,7 +134,7 @@
   <div class="chat-wrapper">
     <div class="chat-header">AJ - Secret AI</div>
     <div class="chat-messages" id="chatMessages">
-      <div class="chat-message bot">हाय भाई! मैं AJ हूँ। 😎</div>
+      <div class="chat-message bot">हाय भाई! मैं A.J. हूँ। 😎</div>
     </div>
 
     <div class="chat-input-area">
@@ -142,7 +155,6 @@
         <i class="fas fa-paper-plane"></i>
       </button>
 
-      <!-- Preview area for selected file -->
       <div id="filePreview"></div>
     </div>
   </div>
@@ -163,7 +175,7 @@
           reader.onload = (e) => { addImageMessage(e.target.result, "user"); };
           reader.readAsDataURL(selectedFile);
         } else {
-          addMessage(`Document uploaded: ${selectedFile.name}`, "user");
+          addMessage(`📄 ${selectedFile.name}`, "user");
         }
         selectedFile = null;
         document.getElementById("filePreview").innerHTML = "";
@@ -181,7 +193,7 @@
           body: JSON.stringify({
             model: "deepseek/deepseek-chat-v3.1:free",
             messages: [
-              { role: "system", content: "You are AJ, created by Ayush. ✅ हमेशा अगर कोई creator पूछे तो बताओ कि तुम्हारा creator Ayush है। ✅ Reply Hinglish में दो। ✅ Step-by-step explain karo, bullets use karo, aur tone friendly + professional rakho." },
+              { role: "system", content: "You are A.J., created by Ayush. ✅ हमेशा अगर कोई creator पूछे तो बताओ कि तुम्हारा creator Ayush है। ✅ Reply Hinglish,Hindi.English में दो। ✅ Step-by-step explain karo, bullets use karo, aur tone friendly + professional rakho." },
               { role: "user", content: msg }
             ],
             temperature: 0.7,
