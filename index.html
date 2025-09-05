@@ -1,57 +1,80 @@
-<div style="width:100%; height:100%;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     html, body {
+      height: 100%;
       margin: 0;
       padding: 0;
-      height: 70%;
-      width: 170%;
-      background: #000;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      background: #181818;
+      width: 100vw;
+      font-size: 16px;
     }
-
+    body {
+      min-height: 100vh;
+      min-width: 100vw;
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      font-size: 16px;
+    }
     .chat-wrapper * { box-sizing: border-box; }
     .chat-wrapper {
-      background: rgba(22, 22, 22, 0.95);
+      background: rgba(22, 22, 22, 0.9);
       border: 1px solid #333;
-      border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 0 25px rgba(0, 0, 0, 0.8);
       display: flex;
       flex-direction: column;
-      width: 100%;
-      max-width: 600px;
-      height: 60vh;
+      height: 80vh;
+      width: 99vw;           /* <-- 3% bada kar diya */
+      max-width: 99vw;       /* <-- 3% bada kar diya */
+      max-height: 80vh;
+      margin: 0;
+      border-radius: 0;
+      box-shadow: none;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 16px;
     }
 
     .chat-header {
       background: rgba(0, 0, 0, 0.7);
       color: #ff69b4;
       text-align: center;
-      padding: 18px;
+      padding: 20px;
       font-weight: bold;
-      font-size: 22px;
-      letter-spacing: 1px;
+      font-size: 18px;
     }
 
     .chat-messages {
       flex: 1;
-      padding: 15px;
+      min-height: 0;
+      padding: 20px;
       overflow-y: auto;
       background: rgba(0, 0, 0, 0.4);
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      font-size: 16px;
+      gap: 16px;
+      font-size: 14px;
+      scroll-behavior: smooth; /* Smooth scroll for new messages */
     }
 
     .chat-message {
-      padding: 12px 16px;
+      padding: 10px 14px;
       border-radius: 12px;
+      font-size: 14px;
       line-height: 1.5;
       max-width: 85%;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeInUp 0.3s forwards;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .chat-message.user {
@@ -83,74 +106,260 @@
     .chat-input-area {
       display: flex;
       gap: 8px;
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.6);
       border-top: 1px solid #444;
       padding: 12px;
+      flex-wrap: nowrap;
       align-items: center;
+      max-width: 600px;
+      margin: 0 auto;
+      width: 100%;
+      position: relative;
+      z-index: 10;
+      transition: transform 0.2s, bottom 0.2s;
+      will-change: transform, bottom;
     }
+
+    .chat-input-area .plus-btn {
+      background: none;
+      border: none;
+      color: #ff69b4;
+      font-size: 22px;
+      margin-right: 6px;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 3;
+    }
+    .chat-input-area .plus-btn:active {
+      color: #ff5ca8;
+    }
+
+    .chat-input-area .input-options {
+      display: none;
+      position: absolute;
+      left: 40px;
+      bottom: 48px;
+      background: #232323;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px #0008;
+      padding: 8px 0;
+      flex-direction: column;
+      gap: 0;
+      z-index: 20;
+      min-width: 120px;
+      animation: fadeInOpt 0.18s;
+    }
+    @keyframes fadeInOpt {
+      from { opacity: 0; transform: translateY(10px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+    .chat-input-area .input-options button {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 15px;
+      padding: 8px 18px 8px 10px;
+      text-align: left;
+      width: 100%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 0;
+    }
+    .chat-input-area .input-options button:hover {
+      background: #333;
+      color: #ff69b4;
+    }
+    .chat-input-area .input-options i.fa-camera { color: #00e676; }
+    .chat-input-area .input-options i.fa-file-alt { color: #ffb300; }
 
     .chat-input-area input[type="text"] {
       flex: 1;
-      padding: 12px;
+      padding: 12px 44px 12px 36px; /* right for send, left for icons */
       border: none;
       border-radius: 8px;
       background: #333;
       color: #fff;
       outline: none;
       font-size: 16px;
+      position: relative;
     }
 
-    .chat-input-area button {
+    /* Camera button absolute inside input */
+    .chat-input-area .camera-btn {
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      padding: 0;
+      margin: 0;
+      cursor: pointer;
+      z-index: 2;
+      height: 28px;
+      width: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .chat-input-area .fa-camera {
+      color: #00e676; /* Green theme for camera */
+      font-size: 20px;
+      display: inline-block;
+      width: 20px;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    /* Document button absolute inside input */
+    .chat-input-area .doc-btn {
+      position: absolute;
+      left: 36px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      padding: 0;
+      margin: 0;
+      cursor: pointer;
+      z-index: 2;
+      height: 28px;
+      width: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .chat-input-area .fa-file-alt {
+      color: #ffb300; /* Amber theme for document */
+      font-size: 20px;
+      display: inline-block;
+      width: 20px;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    /* Send button absolute inside input */
+    .chat-input-area .send-btn {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
       background-color: #ff69b4;
       border: none;
       border-radius: 8px;
-      padding: 12px 14px;
+      padding: 6px 10px;
       color: #fff;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 18px;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-
-    .chat-input-area button:hover {
+    .chat-input-area .send-btn:hover {
       background-color: #ff5ca8;
     }
 
     .chat-image-preview {
-      max-width: 100px;
+      max-width: 120px;
       border-radius: 8px;
       margin-left: 8px;
     }
 
     .chat-file-preview {
-      max-width: 150px;
+      max-width: 180px;
       background: #444;
       color: #fff;
-      padding: 5px 10px;
+      padding: 7px 12px;
       border-radius: 8px;
       margin-left: 8px;
-      font-size: 12px;
+      font-size: 15px;
       overflow-wrap: break-word;
     }
-  </style>
 
+    @media (max-width: 650px) {
+      .chat-wrapper {
+        height: 90vh;
+        min-height: 90dvh;
+        max-height: 90vh;
+        width: 100vw;
+        max-width: 100vw;
+      }
+      .chat-input-area {
+        max-width: 100%;
+        margin: 0;
+        padding: 8px;
+      }
+      .chat-input-area input[type="text"] {
+        padding: 10px 40px 10px 32px;
+        font-size: 16px;
+      }
+      .chat-input-area .camera-btn,
+      .chat-input-area .doc-btn {
+        height: 24px;
+        width: 24px;
+      }
+      .chat-input-area .fa-camera,
+      .chat-input-area .fa-file-alt {
+        font-size: 18px;
+        width: 18px;
+      }
+      .chat-input-area .send-btn {
+        font-size: 16px;
+        padding: 5px 8px;
+      }
+      .chat-image-preview {
+        max-width: 80px;
+        margin-left: 4px;
+      }
+      .chat-file-preview {
+        max-width: 110px;
+        font-size: 13px;
+        margin-left: 4px;
+        padding: 4px 8px;
+      }
+      .chat-input-area .input-options {
+        left: 10px;
+        bottom: 44px;
+        min-width: 100px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
   <div class="chat-wrapper">
-    <div class="chat-header">AJ - INTELLIGENCE</div>
+    <div class="chat-header">AJ-INTELLIGENCE</div>
     <div class="chat-messages" id="chatMessages">
       <div class="chat-message bot">हाय भाई! मैं AJ हूँ। 😎</div>
     </div>
 
     <div class="chat-input-area">
-      <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="handleFileSelect(event)">
-      <button onclick="document.getElementById('cameraInput').click()">
-        <i class="fas fa-camera"></i>
+      <!-- Plus button for options -->
+      <button type="button" class="plus-btn" id="plusBtn" title="More">
+        <i class="fas fa-plus"></i>
       </button>
-
-      <input type="file" id="docInput" accept=".pdf,.doc,.docx,.txt" style="display:none;" onchange="handleFileSelect(event)">
-      <button onclick="document.getElementById('docInput').click()">
-        <i class="fas fa-file-alt"></i>
-      </button>
+      <!-- Hidden options menu -->
+      <div class="input-options" id="inputOptions">
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="handleFileSelect(event)">
+        <button type="button" onclick="document.getElementById('cameraInput').click()" title="Camera">
+          <i class="fas fa-camera"></i> Camera
+        </button>
+        <input type="file" id="docInput" accept=".pdf,.doc,.docx,.txt" style="display:none;" onchange="handleFileSelect(event)">
+        <button type="button" onclick="document.getElementById('docInput').click()" title="Document">
+          <i class="fas fa-file-alt"></i> Document
+        </button>
+      </div>
 
       <input type="text" id="userInput" placeholder="कोई भी टॉपिक पूछो...">
-      <button onclick="sendMessage()">
+      <button type="button" class="send-btn" onclick="sendMessage()" title="Send">
         <i class="fas fa-paper-plane"></i>
       </button>
 
@@ -171,9 +380,7 @@
       if (selectedFile) {
         if (selectedFile.type.startsWith("image/")) {
           const reader = new FileReader();
-          reader.onload = (e) => {
-            addImageMessage(e.target.result, "user");
-          };
+          reader.onload = (e) => { addImageMessage(e.target.result, "user"); };
           reader.readAsDataURL(selectedFile);
         } else {
           addMessage(`Document uploaded: ${selectedFile.name}`, "user");
@@ -182,11 +389,9 @@
         document.getElementById("filePreview").innerHTML = "";
       }
 
-      if (msg) {
-        addMessage(msg, "user");
-      }
-
+      if (msg) addMessage(msg, "user");
       input.value = "";
+
       const botMsg = addMessage("⏳ AJ सोच रहा है...", "bot");
 
       try {
@@ -198,7 +403,7 @@
             messages: [
               {
                 role: "system",
-                content: "You are AJ, created by Ayush. ✅ हमेशा अगर कोई creator पूछे तो बताओ कि तुम्हारा creator Ayush है। ✅ Reply Hinglish में दो। ✅ Step-by-step explain karo, bullets use karo, aur tone friendly + professional rakho."
+                content: "You are AJ, created by Ayush. ✅ हमेशा agar koi creator pooche toh Ayush batao. ✅ Reply Hinglish mein karo. ✅ Step-by-step explain karo, bullets use karo, aur tone friendly + professional rakho."
               },
               { role: "user", content: msg }
             ],
@@ -206,12 +411,13 @@
             max_tokens: 800
           })
         });
-
         const data = await response.json();
         const reply = data.choices?.[0]?.message?.content?.trim() || "❌ Error in response";
         botMsg.innerHTML = reply.replace(/\n/g, "<br>");
+        scrollToBottom();
       } catch (err) {
         botMsg.textContent = "अरे यार! Server busy है... बाद में try करना। 🚀";
+        scrollToBottom();
       }
     }
 
@@ -220,7 +426,7 @@
       msgDiv.className = `chat-message ${sender}`;
       msgDiv.textContent = text;
       document.getElementById("chatMessages").appendChild(msgDiv);
-      document.getElementById("chatMessages").scrollTop = document.getElementById("chatMessages").scrollHeight;
+      scrollToBottom();
       return msgDiv;
     }
 
@@ -232,7 +438,7 @@
       wrapper.className = `chat-message ${sender}`;
       wrapper.appendChild(img);
       document.getElementById("chatMessages").appendChild(wrapper);
-      document.getElementById("chatMessages").scrollTop = document.getElementById("chatMessages").scrollHeight;
+      scrollToBottom();
       return wrapper;
     }
 
@@ -255,5 +461,69 @@
       }
     }
 
-    document.getElementById("userInpu
+    document.getElementById("userInput").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") sendMessage();
+    });
 
+    // Always scroll to bottom on new message
+    function scrollToBottom() {
+      const chatMessages = document.getElementById("chatMessages");
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Mobile keyboard: keep input above keyboard (WhatsApp style)
+    function adjustForKeyboard() {
+      const inputArea = document.querySelector('.chat-input-area');
+      const chatWrapper = document.querySelector('.chat-wrapper');
+      const chatMessages = document.getElementById('chatMessages');
+
+      function onFocus() {
+        // For most mobile browsers, this will push input up
+        setTimeout(() => {
+          inputArea.scrollIntoView({ behavior: "smooth", block: "end" });
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }, 300);
+      }
+
+      document.getElementById('userInput').addEventListener('focus', onFocus);
+
+      // For iOS/Android browsers with visualViewport API
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', () => {
+          if (window.visualViewport.height < window.innerHeight) {
+            inputArea.style.position = 'fixed';
+            inputArea.style.left = '0';
+            inputArea.style.right = '0';
+            inputArea.style.bottom = '0';
+            inputArea.style.zIndex = '1000';
+            inputArea.style.background = 'rgba(22,22,22,0.98)';
+            chatWrapper.style.height = '60vh';
+          } else {
+            inputArea.style.position = '';
+            inputArea.style.left = '';
+            inputArea.style.right = '';
+            inputArea.style.bottom = '';
+            inputArea.style.zIndex = '';
+            inputArea.style.background = '';
+            chatWrapper.style.height = '';
+          }
+        });
+      }
+    }
+    adjustForKeyboard();
+
+    // Plus button toggle for options
+    document.getElementById('plusBtn').addEventListener('click', function(e) {
+      e.stopPropagation();
+      const menu = document.getElementById('inputOptions');
+      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+      menu.style.flexDirection = 'column';
+    });
+    // Hide menu when clicking outside
+    document.addEventListener('click', function(e) {
+      const menu = document.getElementById('inputOptions');
+      if (menu.style.display === 'flex') menu.style.display = 'none';
+    });
+  </script>
+</body>
+</html>
