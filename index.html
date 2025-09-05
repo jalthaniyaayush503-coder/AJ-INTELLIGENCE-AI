@@ -377,24 +377,39 @@
       const msg = input.value.trim();
       if (!msg && !selectedFile) return;
 
-      // Detect language (simple check)
+      // Detect language (improved for Hinglish detection)
       function detectLang(text) {
-        // Hindi Unicode range: \u0900-\u097F
-        if (/^[\u0900-\u097F\s\d.,?!\-]+$/u.test(text)) return "hindi";
-        if (/^[a-zA-Z0-9\s.,?!\-]+$/i.test(text)) return "english";
-        if (/[a-zA-Z]/.test(text) && /[अ-ह]/.test(text)) return "hinglish";
+        text = (text || "").trim();
+        const devanagariCount = (text.match(/[\u0900-\u097F]/g) || []).length;
+        const latinCount = (text.match(/[A-Za-z]/g) || []).length;
+
+        // If only Devanagari characters -> Hindi
+        if (devanagariCount > 0 && latinCount === 0) return "hindi";
+
+        // If Latin letters contain common Hindi words -> Hinglish (transliteration)
+        const hinglishRegex = /\b(kya|hai|kaise|ka|ke|ki|mein|main|mujhe|tum|tu|aap|hota|hona|ho|nahi|haan|kuch|kaun|kyun|kab|mera|meri|kar|karo|batao|samjho|bahut|dhanyavaad|shukriya|please)\b/i;
+        if (latinCount > 0 && hinglishRegex.test(text)) return "hinglish";
+
+        // If only Latin letters -> English
+        if (latinCount > 0 && devanagariCount === 0) return "english";
+
+        // Mixed scripts -> Hinglish
+        if (devanagariCount > 0 && latinCount > 0) return "hinglish";
+
         return "auto";
       }
       const userLang = detectLang(msg);
 
-      // Prepare system prompt based on language
+      // Stronger system prompts: force reply in detected language/script
       let systemPrompt = "";
       if (userLang === "hindi") {
-        systemPrompt = "तुम AJ हो, Ayush द्वारा बनाए गए। ✅ हमेशा अगर कोई creator पूछे तो Ayush बताओ। ✅ जवाब हमेशा हिंदी में दो। ✅ Step-by-step explain करो, bullets use करो, और tone friendly + professional रखो।";
+        systemPrompt = "तुम AJ हो, Ayush द्वारा बनाए गए। ✅ हमेशा अगर कोई creator पूछे तो Ayush बताओ। ✅ जवाब केवल हिंदी (देवनागरी) में दो। ✅ Step-by-step समझाओ, bullets use करो, tone friendly और professional रखो।";
       } else if (userLang === "english") {
-        systemPrompt = "You are AJ, created by Ayush. ✅ Always tell Ayush if anyone asks about creator. ✅ Reply only in English. ✅ Explain step-by-step, use bullets, and keep tone friendly + professional.";
+        systemPrompt = "You are AJ, created by Ayush. ✅ Always tell Ayush if anyone asks about creator. ✅ Reply strictly in English. ✅ Explain step-by-step, use bullets, and keep tone friendly and professional.";
       } else if (userLang === "hinglish") {
-        systemPrompt = "You are AJ, created by Ayush. ✅ हमेशा agar koi creator pooche toh Ayush batao. ✅ Reply Hinglish mein karo. ✅ Step-by-step explain karo, bullets use karo, aur tone friendly + professional rakho.";
+        systemPrompt = "You are AJ, created by Ayush. ✅ हमेशा agar koi creator pooche toh Ayush batao. ✅ Reply in Hinglish using the same Latin script (transliteration) the user used — mix Hindi and English naturally. ✅ Do NOT switch to Devanagari. ✅ Step-by-step explain karo, bullets use karo, aur tone friendly + professional rakho.";
+      } else {
+        systemPrompt = "You are AJ, created by Ayush. ✅ Always tell Ayush if anyone asks about creator. ✅ Detect user's language and reply in the same language and script they used. ✅ Explain step-by-step, use bullets, and keep tone friendly + professional.";
       }
 
       if (selectedFile) {
