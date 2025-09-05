@@ -380,9 +380,9 @@
       // Detect language (simple check)
       function detectLang(text) {
         // Hindi Unicode range: \u0900-\u097F
-        if (/[a-zA-Z]/.test(text) && /[अ-ह]/.test(text)) return "hinglish";
         if (/^[\u0900-\u097F\s\d.,?!\-]+$/u.test(text)) return "hindi";
         if (/^[a-zA-Z0-9\s.,?!\-]+$/i.test(text)) return "english";
+        if (/[a-zA-Z]/.test(text) && /[अ-ह]/.test(text)) return "hinglish";
         return "auto";
       }
       const userLang = detectLang(msg);
