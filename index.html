@@ -377,6 +377,26 @@
       const msg = input.value.trim();
       if (!msg && !selectedFile) return;
 
+      // Detect language (simple check)
+      function detectLang(text) {
+        // Hindi Unicode range: \u0900-\u097F
+        if (/[a-zA-Z]/.test(text) && /[अ-ह]/.test(text)) return "hinglish";
+        if (/^[\u0900-\u097F\s\d.,?!\-]+$/u.test(text)) return "hindi";
+        if (/^[a-zA-Z0-9\s.,?!\-]+$/i.test(text)) return "english";
+        return "auto";
+      }
+      const userLang = detectLang(msg);
+
+      // Prepare system prompt based on language
+      let systemPrompt = "";
+      if (userLang === "hindi") {
+        systemPrompt = "तुम AJ हो, Ayush द्वारा बनाए गए। ✅ हमेशा अगर कोई creator पूछे तो Ayush बताओ। ✅ जवाब हमेशा हिंदी में दो। ✅ Step-by-step explain करो, bullets use करो, और tone friendly + professional रखो।";
+      } else if (userLang === "english") {
+        systemPrompt = "You are AJ, created by Ayush. ✅ Always tell Ayush if anyone asks about creator. ✅ Reply only in English. ✅ Explain step-by-step, use bullets, and keep tone friendly + professional.";
+      } else if (userLang === "hinglish") {
+        systemPrompt = "You are AJ, created by Ayush. ✅ हमेशा agar koi creator pooche toh Ayush batao. ✅ Reply Hinglish mein karo. ✅ Step-by-step explain karo, bullets use karo, aur tone friendly + professional rakho.";
+      }
+
       if (selectedFile) {
         if (selectedFile.type.startsWith("image/")) {
           const reader = new FileReader();
@@ -403,7 +423,7 @@
             messages: [
               {
                 role: "system",
-                content: "You are AJ, created by Ayush. ✅ हमेशा agar koi creator pooche toh Ayush batao. ✅ Reply Hinglish mein karo. ✅ Step-by-step explain karo, bullets use karo, aur tone friendly + professional rakho."
+                content: systemPrompt
               },
               { role: "user", content: msg }
             ],
