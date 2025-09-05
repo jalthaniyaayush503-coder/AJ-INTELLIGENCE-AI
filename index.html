@@ -26,10 +26,10 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      height: 80vh;
-      width: 99vw;           /* <-- 3% bada kar diya */
-      max-width: 99vw;       /* <-- 3% bada kar diya */
-      max-height: 80vh;
+      height: 94vh;      /* <-- yahan 80vh se 94vh kar diya */
+      width: 100vw;
+      max-width: 100vw;
+      max-height: 94vh;  /* <-- yahan bhi 94vh */
       margin: 0;
       border-radius: 0;
       box-shadow: none;
@@ -286,9 +286,9 @@
 
     @media (max-width: 650px) {
       .chat-wrapper {
-        height: 90vh;
-        min-height: 90dvh;
-        max-height: 90vh;
+        height: 98vh;         /* <-- mobile pe bhi jyada height */
+        min-height: 98dvh;
+        max-height: 98vh;
         width: 100vw;
         max-width: 100vw;
       }
