@@ -26,10 +26,10 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      height: 94vh;      /* <-- yahan 80vh se 94vh kar diya */
+      height: 94vh;
       width: 100vw;
       max-width: 100vw;
-      max-height: 94vh;  /* <-- yahan bhi 94vh */
+      max-height: 94vh;
       margin: 0;
       border-radius: 0;
       box-shadow: none;
@@ -56,7 +56,7 @@
       flex-direction: column;
       gap: 16px;
       font-size: 14px;
-      scroll-behavior: smooth; /* Smooth scroll for new messages */
+      scroll-behavior: smooth;
     }
 
     .chat-message {
@@ -181,7 +181,7 @@
 
     .chat-input-area input[type="text"] {
       flex: 1;
-      padding: 12px 44px 12px 36px; /* right for send, left for icons */
+      padding: 12px 44px 12px 36px;
       border: none;
       border-radius: 8px;
       background: #333;
@@ -191,7 +191,6 @@
       position: relative;
     }
 
-    /* Camera button absolute inside input */
     .chat-input-area .camera-btn {
       position: absolute;
       left: 8px;
@@ -210,7 +209,7 @@
       justify-content: center;
     }
     .chat-input-area .fa-camera {
-      color: #00e676; /* Green theme for camera */
+      color: #00e676;
       font-size: 20px;
       display: inline-block;
       width: 20px;
@@ -218,7 +217,6 @@
       vertical-align: middle;
     }
 
-    /* Document button absolute inside input */
     .chat-input-area .doc-btn {
       position: absolute;
       left: 36px;
@@ -237,7 +235,7 @@
       justify-content: center;
     }
     .chat-input-area .fa-file-alt {
-      color: #ffb300; /* Amber theme for document */
+      color: #ffb300;
       font-size: 20px;
       display: inline-block;
       width: 20px;
@@ -245,7 +243,6 @@
       vertical-align: middle;
     }
 
-    /* Send button absolute inside input */
     .chat-input-area .send-btn {
       position: absolute;
       right: 8px;
@@ -286,7 +283,7 @@
 
     @media (max-width: 650px) {
       .chat-wrapper {
-        height: 98vh;         /* <-- mobile pe bhi jyada height */
+        height: 98vh;
         min-height: 98dvh;
         max-height: 98vh;
         width: 100vw;
@@ -342,11 +339,9 @@
     </div>
 
     <div class="chat-input-area">
-      <!-- Plus button for options -->
       <button type="button" class="plus-btn" id="plusBtn" title="More">
         <i class="fas fa-plus"></i>
       </button>
-      <!-- Hidden options menu -->
       <div class="input-options" id="inputOptions">
         <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="handleFileSelect(event)">
         <button type="button" onclick="document.getElementById('cameraInput').click()" title="Camera">
@@ -370,37 +365,30 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
   <script>
     let selectedFile = null;
-    const BACKEND_URL = "https://aj-backend-79nl.onrender.com/chat";
+
+    // 👉 Backend URL
+    const BACKEND_URL = "https://openrouter.ai/api/v1/chat/completions";
+    const OPENROUTER_API_KEY = "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";
 
     async function sendMessage() {
       const input = document.getElementById("userInput");
       const msg = input.value.trim();
       if (!msg && !selectedFile) return;
 
-      // Detect language (improved for Hinglish detection)
       function detectLang(text) {
         text = (text || "").trim();
         const devanagariCount = (text.match(/[\u0900-\u097F]/g) || []).length;
         const latinCount = (text.match(/[A-Za-z]/g) || []).length;
 
-        // If only Devanagari characters -> Hindi
         if (devanagariCount > 0 && latinCount === 0) return "hindi";
-
-        // If Latin letters contain common Hindi words -> Hinglish (transliteration)
         const hinglishRegex = /\b(kya|hai|kaise|ka|ke|ki|mein|main|mujhe|tum|tu|aap|hota|hona|ho|nahi|haan|kuch|kaun|kyun|kab|mera|meri|kar|karo|batao|samjho|bahut|dhanyavaad|shukriya|please)\b/i;
         if (latinCount > 0 && hinglishRegex.test(text)) return "hinglish";
-
-        // If only Latin letters -> English
         if (latinCount > 0 && devanagariCount === 0) return "english";
-
-        // Mixed scripts -> Hinglish
         if (devanagariCount > 0 && latinCount > 0) return "hinglish";
-
         return "auto";
       }
       const userLang = detectLang(msg);
 
-      // Stronger system prompts: force reply in detected language/script
       let systemPrompt = "";
       if (userLang === "hindi") {
         systemPrompt = "तुम AJ हो, Ayush द्वारा बनाए गए। ✅ हमेशा अगर कोई creator पूछे तो Ayush बताओ। ✅ जवाब केवल हिंदी (देवनागरी) में दो। ✅ Step-by-step समझाओ, bullets use करो, tone friendly और professional रखो।";
@@ -432,14 +420,14 @@
       try {
         const response = await fetch(BACKEND_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+            "Content-Type": "application/json"
+          },
           body: JSON.stringify({
-            model: "deepseek/deepseek-chat-v3.1:free",
+            model: "deepseek/deepseek-chat",
             messages: [
-              {
-                role: "system",
-                content: systemPrompt
-              },
+              { role: "system", content: systemPrompt },
               { role: "user", content: msg }
             ],
             temperature: 0.7,
@@ -496,69 +484,82 @@
       }
     }
 
-    document.getElementById("userInput").addEventListener("keypress", function(e) {
-      if (e.key === "Enter") sendMessage();
+    document.getElementById("userInput").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        sendMessage();
+      }
     });
 
-    // Always scroll to bottom on new message
     function scrollToBottom() {
       const chatMessages = document.getElementById("chatMessages");
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    // Mobile keyboard: keep input above keyboard (WhatsApp style)
     function adjustForKeyboard() {
       const inputArea = document.querySelector('.chat-input-area');
       const chatWrapper = document.querySelector('.chat-wrapper');
       const chatMessages = document.getElementById('chatMessages');
 
-      function onFocus() {
-        // For most mobile browsers, this will push input up
+      // focus scroll helper
+      document.getElementById('userInput').addEventListener('focus', () => {
         setTimeout(() => {
-          inputArea.scrollIntoView({ behavior: "smooth", block: "end" });
-          chatMessages.scrollTop = chatMessages.scrollHeight;
-        }, 300);
-      }
+          scrollToBottom();
+          inputArea.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }, 250);
+      });
 
-      document.getElementById('userInput').addEventListener('focus', onFocus);
-
-      // For iOS/Android browsers with visualViewport API
+      // visualViewport handling for mobile keyboards
       if (window.visualViewport) {
+        let lastHeight = window.visualViewport.height;
         window.visualViewport.addEventListener('resize', () => {
-          if (window.visualViewport.height < window.innerHeight) {
+          const vh = window.visualViewport.height;
+          if (vh < lastHeight) {
+            // keyboard opened
             inputArea.style.position = 'fixed';
             inputArea.style.left = '0';
             inputArea.style.right = '0';
             inputArea.style.bottom = '0';
             inputArea.style.zIndex = '1000';
-            inputArea.style.background = 'rgba(22,22,22,0.98)';
-            chatWrapper.style.height = '60vh';
+            chatWrapper.style.height = (vh) + 'px';
+            scrollToBottom();
           } else {
+            // keyboard closed
             inputArea.style.position = '';
             inputArea.style.left = '';
             inputArea.style.right = '';
             inputArea.style.bottom = '';
             inputArea.style.zIndex = '';
-            inputArea.style.background = '';
             chatWrapper.style.height = '';
           }
+          lastHeight = vh;
         });
       }
+
+      // fallback: on window resize try to keep input visible
+      window.addEventListener('resize', () => {
+        setTimeout(() => {
+          scrollToBottom();
+        }, 150);
+      });
     }
     adjustForKeyboard();
 
-    // Plus button toggle for options
-    document.getElementById('plusBtn').addEventListener('click', function(e) {
+    // plus button toggle (options menu)
+    const plusBtn = document.getElementById('plusBtn');
+    const inputOptions = document.getElementById('inputOptions');
+    plusBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const menu = document.getElementById('inputOptions');
-      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
-      menu.style.flexDirection = 'column';
+      inputOptions.style.display = inputOptions.style.display === 'flex' ? 'none' : 'flex';
+      inputOptions.style.flexDirection = 'column';
     });
-    // Hide menu when clicking outside
-    document.addEventListener('click', function(e) {
-      const menu = document.getElementById('inputOptions');
-      if (menu.style.display === 'flex') menu.style.display = 'none';
+    document.addEventListener('click', () => {
+      if (inputOptions) inputOptions.style.display = 'none';
     });
+
+    // ensure file inputs reset after use
+    document.getElementById('cameraInput').addEventListener('change', handleFileSelect);
+    document.getElementById('docInput').addEventListener('change', handleFileSelect);
   </script>
 </body>
 </html>
